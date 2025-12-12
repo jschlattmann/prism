@@ -1,0 +1,5295 @@
+{
+  "datasets": [
+    {
+      "name": "467662e7",
+      "displayName": "Account Prism View Data Summary",
+      "queryLines": [
+        "select * from teamconnect.pca_prism.vw_account_prism; "
+      ]
+    },
+    {
+      "name": "11993e6d",
+      "displayName": "Customer Payment and Adjustment Events Summary Dataset",
+      "queryLines": [
+        "SELECT\r\n",
+        "  v.btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "\r\n",
+        "  'PAYMENT'        AS event_type,\r\n",
+        "  pay.payment_date AS event_date,\r\n",
+        "  pay.amount       AS event_amount,\r\n",
+        "\r\n",
+        "  pay.type         AS payment_type,\r\n",
+        "  pay.type_desc    AS payment_type_description,\r\n",
+        "\r\n",
+        "  NULL             AS adjustment_code,\r\n",
+        "  NULL             AS adjustment_description,\r\n",
+        "\r\n",
+        "  NULL             AS treatment_type,\r\n",
+        "  NULL             AS treatment_type_description,\r\n",
+        "  NULL             AS treatment_status\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.payment_ledger_last_12m) exploded_pay AS pay\r\n",
+        "\r\n",
+        "UNION ALL\r\n",
+        "\r\n",
+        "-- ADJUSTMENTS\r\n",
+        "SELECT\r\n",
+        "  v.btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "\r\n",
+        "  'ADJUSTMENT'          AS event_type,\r\n",
+        "  adj.post_date         AS event_date,\r\n",
+        "  adj.amount            AS event_amount,\r\n",
+        "\r\n",
+        "  NULL                  AS payment_type,\r\n",
+        "  NULL                  AS payment_type_description,\r\n",
+        "\r\n",
+        "  adj.credit_code       AS adjustment_code,\r\n",
+        "  adj.credit_desc       AS adjustment_description,\r\n",
+        "\r\n",
+        "  NULL                  AS treatment_type,\r\n",
+        "  NULL                  AS treatment_type_description,\r\n",
+        "  NULL                  AS treatment_status\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.adjustments_last_12m) exploded_adj AS adj\r\n",
+        "\r\n",
+        "UNION ALL\r\n",
+        "\r\n",
+        "-- TREATMENTS\r\n",
+        "SELECT\r\n",
+        "  v.btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "\r\n",
+        "  'TREATMENT'                 AS event_type,\r\n",
+        "  trt.treatment_date          AS event_date,\r\n",
+        "  trt.treatment_amount        AS event_amount,\r\n",
+        "\r\n",
+        "  NULL                        AS payment_type,\r\n",
+        "  NULL                        AS payment_type_description,\r\n",
+        "\r\n",
+        "  NULL                        AS adjustment_code,\r\n",
+        "  NULL                        AS adjustment_description,\r\n",
+        "\r\n",
+        "  trt.treatment_type          AS treatment_type,\r\n",
+        "  trt.treatment_type_description AS treatment_type_description,\r\n",
+        "  trt.treatment_status        AS treatment_status\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.treatment_events_last_12m) exploded_trt AS trt;"
+      ]
+    },
+    {
+      "name": "6b04b68c",
+      "displayName": "Account Adjustments Summary for Last Twelve Months",
+      "queryLines": [
+        "SELECT\r\n",
+        "    v.btn,\r\n",
+        "    v.dpi_environment,\r\n",
+        "    v.customer_name,\r\n",
+        "    v.service_address,\r\n",
+        "    a.credit_code,\r\n",
+        "    a.credit_desc,\r\n",
+        "    a.amount,\r\n",
+        "    a.post_date\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.adjustments_last_12m) AS a;\r\n"
+      ]
+    },
+    {
+      "name": "b91f79b5",
+      "displayName": "Active Promotions Details by Account Dataset",
+      "queryLines": [
+        "SELECT\r\n",
+        "  v.btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "  pr.promo_code,\r\n",
+        "  pr.promo_start,\r\n",
+        "  pr.promo_end\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.active_promos) AS pr;\r\n"
+      ]
+    },
+    {
+      "name": "0d525c15",
+      "displayName": "Account Services Overview with Environment Details",
+      "queryLines": [
+        "SELECT\r\n",
+        "  v.btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.current_mrc_sum,\r\n",
+        "  cs.*\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.current_services) exploded AS cs;\r\n",
+        "\r\n",
+        "\r\n"
+      ]
+    },
+    {
+      "name": "07fea7ea",
+      "displayName": "Account Completeness Metric Summary Dataset",
+      "queryLines": [
+        "WITH scored AS (\r\n",
+        "  SELECT\r\n",
+        "    v.*,\r\n",
+        "    -- completeness score: higher = richer test account\r\n",
+        "    (\r\n",
+        "      CASE WHEN payments_count_12m > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN size(payment_ledger_last_12m) > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN current_mrc_sum > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN size(current_services) > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN size(adjustments_last_12m) > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN adjustments_current_month_sum <> 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN size(active_promos) > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN size(recent_promos_12m) > 0 THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN suspend_open_flag IS NOT NULL \r\n",
+        "             OR dpa_open_flag IS NOT NULL \r\n",
+        "             OR nsf_open_flag IS NOT NULL \r\n",
+        "             OR ovr_open_flag IS NOT NULL THEN 1 ELSE 0 END +\r\n",
+        "      CASE WHEN other_btns_same_name_addr IS NOT NULL \r\n",
+        "             AND size(other_btns_same_name_addr) > 0 THEN 1 ELSE 0 END\r\n",
+        "    ) AS completeness_score\r\n",
+        "  FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "  btn,\r\n",
+        "  dpi_environment,\r\n",
+        "  completeness_score,\r\n",
+        "  customer_name,\r\n",
+        "  days_in_service,\r\n",
+        "  payments_count_12m,\r\n",
+        "  current_mrc_sum,\r\n",
+        "  adjustments_sum_all_time,\r\n",
+        "  size(current_services)        AS svc_cnt,\r\n",
+        "  size(payment_ledger_last_12m) AS pay_txn_cnt_12m,\r\n",
+        "  size(adjustments_last_12m)    AS adj_txn_cnt_12m,\r\n",
+        "  size(active_promos)           AS active_promo_cnt,\r\n",
+        "  size(recent_promos_12m)       AS recent_promo_cnt,\r\n",
+        "  size(other_btns_same_name_addr) AS linked_acct_cnt\r\n",
+        "FROM scored\r\n",
+        "WHERE completeness_score >= 5         -- loosen/tighten as needed\r\n",
+        "ORDER BY completeness_score DESC,\r\n",
+        "         payments_count_12m DESC,\r\n",
+        "         current_mrc_sum DESC\r\n",
+        "LIMIT 100;\r\n"
+      ]
+    },
+    {
+      "name": "a0bbdd01",
+      "displayName": "Account Button Mapping with Related Identifiers Dataset",
+      "queryLines": [
+        "SELECT\r\n",
+        "  v.btn AS primary_btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "  other_btn\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.other_btns_same_name_addr) AS other_btn;"
+      ]
+    },
+    {
+      "name": "80213dee",
+      "displayName": "Recent Payment Ledger Details by Account and Environment",
+      "queryLines": [
+        "SELECT\r\n",
+        "  v.btn,\r\n",
+        "  v.dpi_environment,\r\n",
+        "  v.customer_name,\r\n",
+        "  v.service_address,\r\n",
+        "  p.payment_date,\r\n",
+        "  p.amount,\r\n",
+        "  p.type,\r\n",
+        "  p.type_desc    AS payment_type_description\r\n",
+        "FROM teamconnect.pca_prism.vw_account_prism v\r\n",
+        "LATERAL VIEW EXPLODE(v.payment_ledger_last_12m) AS p"
+      ]
+    },
+    {
+      "name": "ee3e8673",
+      "displayName": "Account Service Address Button Frequency Summary",
+      "queryLines": [
+        "WITH base AS (\r\n",
+        "    SELECT DISTINCT btn, dpi_environment, customer_name, service_address\r\n",
+        "    FROM teamconnect.pca_prism.vw_account_prism\r\n",
+        "),\r\n",
+        "btn_counts AS (\r\n",
+        "    SELECT\r\n",
+        "        dpi_environment,\r\n",
+        "        customer_name,\r\n",
+        "        service_address,\r\n",
+        "        COUNT(DISTINCT btn) AS total_btns\r\n",
+        "    FROM base\r\n",
+        "    GROUP BY dpi_environment, customer_name, service_address\r\n",
+        ")\r\n",
+        "SELECT\r\n",
+        "    b.btn,\r\n",
+        "    bc.total_btns - 1 AS other_btns_same_name_addr\r\n",
+        "FROM base b\r\n",
+        "JOIN btn_counts bc\r\n",
+        "  ON b.dpi_environment = bc.dpi_environment\r\n",
+        " AND b.customer_name = bc.customer_name\r\n",
+        " AND b.service_address = bc.service_address"
+      ]
+    },
+    {
+      "name": "b618e6d3",
+      "displayName": "Prism Service Orders Account Overview",
+      "queryLines": [
+        "select * from teamconnect.pca_prism.vw_service_orders;"
+      ]
+    },
+    {
+      "name": "8b270847",
+      "displayName": "Team Connect Trouble Ticket Insights Summary",
+      "queryLines": [
+        "select * from teamconnect.pca_prism.tbl_trouble_tickets_summary;"
+      ]
+    },
+    {
+      "name": "b0ce6ba0",
+      "displayName": "Sales Channel Performance",
+      "queryLines": [
+        "SELECT \r\n",
+        "  channel_level_1,\r\n",
+        "  channel_level_2,\r\n",
+        "  COUNT(*) AS total_orders,\r\n",
+        "  SUM(total_products_added_value) AS total_revenue,\r\n",
+        "  AVG(data_completeness_score) AS avg_data_quality,\r\n",
+        "  COUNT(CASE WHEN enhanced_migration_type LIKE 'MIGRATION:%' THEN 1 END) AS migrations,\r\n",
+        "  COUNT(CASE WHEN enhanced_technology = 'FIBER' THEN 1 END) AS fiber_orders\r\n",
+        "FROM teamconnect.pca_prism.vw_service_orders_enhanced\r\n",
+        "WHERE match_quality IN ('EXACT_MATCH', 'PHONE_MATCH')\r\n",
+        "  AND channel_level_1 IS NOT NULL\r\n",
+        "GROUP BY channel_level_1, channel_level_2\r\n",
+        "ORDER BY total_revenue DESC;"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "12e30c3c",
+      "displayName": "Billing Details",
+      "layout": [
+        {
+          "widget": {
+            "name": "bc523f82",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size: 18px;\">Billing Details</span><br><br>A unified view of customer account activity, combining services, payments, promotions, adjustments, and treatment status into a single profile. Use this panel to quickly assess account health, recent billing behavior, and key events over the past 12 months."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "97ce47c9",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"font-size: 18px;\">How to Use This Dashboard</span>\n",
+                "\n",
+                "- Select a BTN to load the account.\n",
+                "- All widgets update automatically. \n",
+                "- Drill down for full details.\n",
+                "<p>&nbsp;</p>\n"
+              ]
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "btn",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_btn",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_btn",
+                "query": {
+                  "datasetName": "11993e6d",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_btn",
+                "query": {
+                  "datasetName": "6b04b68c",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_btn",
+                "query": {
+                  "datasetName": "b91f79b5",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_btn",
+                "query": {
+                  "datasetName": "0d525c15",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_primary_btn",
+                "query": {
+                  "datasetName": "a0bbdd01",
+                  "fields": [
+                    {
+                      "name": "primary_btn",
+                      "expression": "`primary_btn`"
+                    },
+                    {
+                      "name": "primary_btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_btn",
+                "query": {
+                  "datasetName": "80213dee",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c6ef530a1be0ba341ca5ae555643_btn",
+                "query": {
+                  "datasetName": "ee3e8673",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "btn_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_btn"
+                  },
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_btn"
+                  },
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_btn"
+                  },
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_btn"
+                  },
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_btn"
+                  },
+                  {
+                    "fieldName": "primary_btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_primary_btn"
+                  },
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_btn"
+                  },
+                  {
+                    "fieldName": "btn",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c6ef530a1be0ba341ca5ae555643_btn"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "BTN"
+              },
+              "selection": {
+                "defaultSelection": {
+                  "operator": {
+                    "operator": "OR",
+                    "args": []
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "environment",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_dpi_environment",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_dpi_environment",
+                "query": {
+                  "datasetName": "0d525c15",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_dpi_environment",
+                "query": {
+                  "datasetName": "11993e6d",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_dpi_environment",
+                "query": {
+                  "datasetName": "6b04b68c",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_dpi_environment",
+                "query": {
+                  "datasetName": "b91f79b5",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_dpi_environment",
+                "query": {
+                  "datasetName": "a0bbdd01",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_dpi_environment",
+                "query": {
+                  "datasetName": "80213dee",
+                  "fields": [
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "dpi_environment_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_dpi_environment"
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_dpi_environment"
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_dpi_environment"
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_dpi_environment"
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_dpi_environment"
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_dpi_environment"
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_dpi_environment"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Environment"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 1,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "address",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_service_address",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_service_address",
+                "query": {
+                  "datasetName": "11993e6d",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_service_address",
+                "query": {
+                  "datasetName": "6b04b68c",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_service_address",
+                "query": {
+                  "datasetName": "b91f79b5",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_service_address",
+                "query": {
+                  "datasetName": "0d525c15",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_service_address",
+                "query": {
+                  "datasetName": "a0bbdd01",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_service_address",
+                "query": {
+                  "datasetName": "80213dee",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "service_address_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_service_address"
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_service_address"
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_service_address"
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_service_address"
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_service_address"
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_service_address"
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_service_address"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Address"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "customers-name",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "customer_name"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Customers Name"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 2,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "cb538a69",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "service_address"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Customers Address"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 3,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "customers-name-1",
+            "queries": [
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_customer_name",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_customer_name",
+                "query": {
+                  "datasetName": "11993e6d",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_customer_name",
+                "query": {
+                  "datasetName": "6b04b68c",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_customer_name",
+                "query": {
+                  "datasetName": "b91f79b5",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_customer_name",
+                "query": {
+                  "datasetName": "0d525c15",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_customer_name",
+                "query": {
+                  "datasetName": "a0bbdd01",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_customer_name",
+                "query": {
+                  "datasetName": "80213dee",
+                  "fields": [
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "customer_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c0d75aab1af094bab22089970ae0_customer_name"
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16537ed1322a21b0fb8859fe392_customer_name"
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c16f14901ef1870b6eb8f96f07aa_customer_name"
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c1821d6d1c90bf20ab361aa20f91_customer_name"
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c18476cf1a2c8a430e06f02e89bb_customer_name"
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c57a2c149898bd0f7f43da0523_customer_name"
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "queryName": "dashboards/01f0c0d083a611cc87a1592ebb036fa5/datasets/01f0c3c5bcd61870ac8440019183a65a_customer_name"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Customers Name"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "connect-date",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "connect_date",
+                      "expression": "`connect_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "connect_date",
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 3
+                    }
+                  },
+                  "format": {
+                    "type": "date",
+                    "date": "locale-number-month",
+                    "leadingZeros": true
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Connect Date"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 1,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "b8244d2b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "disconnect_date",
+                      "expression": "`disconnect_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "disconnect_date",
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 4
+                    }
+                  },
+                  "format": {
+                    "type": "date",
+                    "date": "locale-number-month",
+                    "leadingZeros": true
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Disconnected Date"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 1,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "payment-count-over-time",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11993e6d",
+                  "fields": [
+                    {
+                      "name": "event_type",
+                      "expression": "`event_type`"
+                    },
+                    {
+                      "name": "daily(event_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `event_date`)"
+                    },
+                    {
+                      "name": "event_amount",
+                      "expression": "`event_amount`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(event_date)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "event_amount",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "event_type",
+                  "displayName": "Event Types",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "ADJUSTMENT",
+                        "PAYMENT",
+                        "TREATMENT"
+                      ]
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "12 Month Account History",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "33d444c2",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "days-in-service",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "days_in_service",
+                      "expression": "`days_in_service`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "days_in_service",
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Days in Service"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "dpa-open-flag",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "dpa_open_flag",
+                      "expression": "`dpa_open_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "dpa_open_flag"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "DPA Open Flag"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "a287303c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "dpa_date",
+                      "expression": "`dpa_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "dpa_date",
+                  "format": {
+                    "type": "date",
+                    "date": "locale-number-month",
+                    "leadingZeros": true
+                  },
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 4
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "DPA Date"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "06b86c29",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "suspend_open_flag",
+                      "expression": "`suspend_open_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "suspend_open_flag"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Suspend Open Flag"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 4,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "61123db2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "suspend_date",
+                      "expression": "`suspend_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "suspend_date",
+                  "format": {
+                    "type": "date",
+                    "date": "locale-number-month",
+                    "leadingZeros": true
+                  },
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 4
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Suspend Date"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 5,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "fe12b5bb",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "nsf_open_flag",
+                      "expression": "`nsf_open_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "nsf_open_flag"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "NSF Open Flag"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "36e92bdf",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "dpa_open_flag",
+                      "expression": "`dpa_open_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "dpa_open_flag"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "NSF Date"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 7,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "cf8acdd1",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "ovr_date",
+                      "expression": "`ovr_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "ovr_date"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "OVR Date"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "25a9bbfd",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "ovr_open_flag",
+                      "expression": "`ovr_open_flag`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "ovr_open_flag"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "OVR Open Flag"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 6,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "9061a8e0",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "disqualified_upsell_sne_yn",
+                      "expression": "`disqualified_upsell_sne_yn`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "disqualified_upsell_sne_yn",
+                  "style": {
+                    "rules": [
+                      {
+                        "condition": {
+                          "operator": "=",
+                          "operand": {
+                            "type": "data-value",
+                            "value": "N"
+                          }
+                        },
+                        "color": "#00A972"
+                      },
+                      {
+                        "condition": {
+                          "operator": "=",
+                          "operand": {
+                            "type": "data-value",
+                            "value": "Y"
+                          }
+                        },
+                        "color": {
+                          "themeColorType": "visualizationColors",
+                          "position": 4
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Disqualified Upsell"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "134110e4",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "last_reminder_amount_due",
+                      "expression": "`last_reminder_amount_due`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "last_reminder_amount_due",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Last Reminder Amount Due"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 4,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "8f5d60d7",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "last_reminder_date",
+                      "expression": "`last_reminder_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "last_reminder_date",
+                  "format": {
+                    "type": "date",
+                    "date": "locale-number-month",
+                    "leadingZeros": true
+                  },
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 4
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Last Reminder Date"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 5,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "2fb71d13",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6b04b68c",
+                  "fields": [
+                    {
+                      "name": "credit_desc",
+                      "expression": "`credit_desc`"
+                    },
+                    {
+                      "name": "monthly(post_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `post_date`)"
+                    },
+                    {
+                      "name": "amount",
+                      "expression": "`amount`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(post_date)",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "amount",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "credit_desc",
+                  "displayName": "Adjustment Description",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "12 Month Adjustment History",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 17,
+            "width": 3,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "promotions",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b91f79b5",
+                  "fields": [
+                    {
+                      "name": "promo_code",
+                      "expression": "`promo_code`"
+                    },
+                    {
+                      "name": "promo_start",
+                      "expression": "`promo_start`"
+                    },
+                    {
+                      "name": "promo_end",
+                      "expression": "`promo_end`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "promo_code",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "Promotion",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "promo_start",
+                    "dateTimeFormat": "MM/DD/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100005,
+                    "title": "Promotion Start Date",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "promo_end",
+                    "dateTimeFormat": "MM/DD/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100006,
+                    "title": "Promotion End Date",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "btn",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100000,
+                  "title": "btn",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "dpi_environment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100001,
+                  "title": "dpi_environment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "customer_name",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100002,
+                  "title": "customer_name",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "service_address",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100003,
+                  "title": "service_address",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": true,
+              "frame": {
+                "showTitle": true,
+                "title": "Promotions",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 24,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "account-s-e-s",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0d525c15",
+                  "fields": [
+                    {
+                      "name": "feature_code",
+                      "expression": "`feature_code`"
+                    },
+                    {
+                      "name": "feature_desc",
+                      "expression": "`feature_desc`"
+                    },
+                    {
+                      "name": "package_desc",
+                      "expression": "`package_desc`"
+                    },
+                    {
+                      "name": "product_class",
+                      "expression": "`product_class`"
+                    },
+                    {
+                      "name": "feature_category",
+                      "expression": "`feature_category`"
+                    },
+                    {
+                      "name": "feature_group",
+                      "expression": "`feature_group`"
+                    },
+                    {
+                      "name": "feature_type",
+                      "expression": "`feature_type`"
+                    },
+                    {
+                      "name": "rate",
+                      "expression": "`rate`"
+                    },
+                    {
+                      "name": "quantity",
+                      "expression": "`quantity`"
+                    },
+                    {
+                      "name": "amount",
+                      "expression": "`amount`"
+                    },
+                    {
+                      "name": "effective_date",
+                      "expression": "`effective_date`"
+                    },
+                    {
+                      "name": "cancel_date",
+                      "expression": "`cancel_date`"
+                    },
+                    {
+                      "name": "billed_date",
+                      "expression": "`billed_date`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "feature_code",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 4,
+                    "title": "Feature Code",
+                    "allowSearch": true,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "feature_desc",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 6,
+                    "title": "Feature Description",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "package_desc",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 7,
+                    "title": "Package Description",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "product_class",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 8,
+                    "title": "Product Class",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "feature_category",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 9,
+                    "title": "Feature Category",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "feature_group",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 10,
+                    "title": "Feature Group",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "feature_type",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 11,
+                    "title": "Feature Type",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "rate",
+                    "numberFormat": "$0,000.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 12,
+                    "title": "Rate",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "quantity",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 13,
+                    "title": "Quantity",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "amount",
+                    "numberFormat": "$0,000.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 14,
+                    "title": "Amount",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "effective_date",
+                    "dateTimeFormat": "MM/DD/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 15,
+                    "title": "Effective Date",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "cancel_date",
+                    "dateTimeFormat": "MM/DD/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 16,
+                    "title": "Cancel Date",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "billed_date",
+                    "dateTimeFormat": "MM/DD/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 17,
+                    "title": "Billed Date",
+                    "allowSearch": false,
+                    "alignContent": "center",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "btn",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 0,
+                  "title": "btn",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "dpi_environment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 1,
+                  "title": "dpi_environment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "current_mrc_sum",
+                  "type": "decimal",
+                  "displayAs": "number",
+                  "order": 2,
+                  "title": "current_mrc_sum",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "customer_name",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 3,
+                  "title": "customer_name",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "service_address",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 5,
+                  "title": "service_address",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": true,
+              "frame": {
+                "showTitle": true,
+                "title": "Account S&E's",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 28,
+            "width": 6,
+            "height": 16
+          }
+        },
+        {
+          "widget": {
+            "name": "last-12-months-treatment-types",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "80213dee",
+                  "fields": [
+                    {
+                      "name": "payment_type_description",
+                      "expression": "`payment_type_description`"
+                    },
+                    {
+                      "name": "daily(payment_date)",
+                      "expression": "DATE_TRUNC(\"DAY\", `payment_date`)"
+                    },
+                    {
+                      "name": "amount",
+                      "expression": "`amount`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "daily(payment_date)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "amount",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "payment_type_description",
+                  "displayName": "Payment Type Descriptions",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "12 Month Payment History",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 3,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "677dfd32",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "11993e6d",
+                  "fields": [
+                    {
+                      "name": "treatment_type_description",
+                      "expression": "`treatment_type_description`"
+                    },
+                    {
+                      "name": "monthly(event_date)",
+                      "expression": "DATE_TRUNC(\"MONTH\", `event_date`)"
+                    },
+                    {
+                      "name": "treatment_type",
+                      "expression": "`treatment_type`"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`treatment_type_description` IS NOT NULL"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "monthly(event_date)",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "treatment_type",
+                  "axis": {
+                    "hideTitle": true
+                  },
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "color": {
+                  "fieldName": "treatment_type_description",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "12 Month Treatment History",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 23,
+            "width": 3,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "other-associated-accounts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a0bbdd01",
+                  "fields": [
+                    {
+                      "name": "primary_btn",
+                      "expression": "`primary_btn`"
+                    },
+                    {
+                      "name": "other_btn",
+                      "expression": "`other_btn`"
+                    },
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "primary_btn",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 0,
+                    "title": "primary_btn",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "other_btn",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 1,
+                    "title": "other_btn",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 3,
+                    "title": "customer_name",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 4,
+                    "title": "service_address",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "dpi_environment",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 2,
+                  "title": "dpi_environment",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": true,
+              "frame": {
+                "showTitle": true,
+                "title": "Other Associated Contacts",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 8,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "3655dc54",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 17,
+            "width": 3,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "raw-account-data",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "467662e7",
+                  "fields": [
+                    {
+                      "name": "btn",
+                      "expression": "`btn`"
+                    },
+                    {
+                      "name": "dpi_environment",
+                      "expression": "`dpi_environment`"
+                    },
+                    {
+                      "name": "customer_name",
+                      "expression": "`customer_name`"
+                    },
+                    {
+                      "name": "service_address",
+                      "expression": "`service_address`"
+                    },
+                    {
+                      "name": "connect_date",
+                      "expression": "`connect_date`"
+                    },
+                    {
+                      "name": "disconnect_date",
+                      "expression": "`disconnect_date`"
+                    },
+                    {
+                      "name": "days_in_service",
+                      "expression": "`days_in_service`"
+                    },
+                    {
+                      "name": "suspend_open_flag",
+                      "expression": "`suspend_open_flag`"
+                    },
+                    {
+                      "name": "suspend_date",
+                      "expression": "`suspend_date`"
+                    },
+                    {
+                      "name": "dpa_open_flag",
+                      "expression": "`dpa_open_flag`"
+                    },
+                    {
+                      "name": "dpa_date",
+                      "expression": "`dpa_date`"
+                    },
+                    {
+                      "name": "nsf_open_flag",
+                      "expression": "`nsf_open_flag`"
+                    },
+                    {
+                      "name": "nsf_date",
+                      "expression": "`nsf_date`"
+                    },
+                    {
+                      "name": "ovr_open_flag",
+                      "expression": "`ovr_open_flag`"
+                    },
+                    {
+                      "name": "ovr_date",
+                      "expression": "`ovr_date`"
+                    },
+                    {
+                      "name": "last_reminder_date",
+                      "expression": "`last_reminder_date`"
+                    },
+                    {
+                      "name": "last_reminder_amount_due",
+                      "expression": "`last_reminder_amount_due`"
+                    },
+                    {
+                      "name": "last_suspended_amount",
+                      "expression": "`last_suspended_amount`"
+                    },
+                    {
+                      "name": "disqualified_upsell_sne_yn",
+                      "expression": "`disqualified_upsell_sne_yn`"
+                    },
+                    {
+                      "name": "active_promos",
+                      "expression": "`active_promos`"
+                    },
+                    {
+                      "name": "recent_promos_12m",
+                      "expression": "`recent_promos_12m`"
+                    },
+                    {
+                      "name": "last_treatment_date",
+                      "expression": "`last_treatment_date`"
+                    },
+                    {
+                      "name": "last_treatment_type",
+                      "expression": "`last_treatment_type`"
+                    },
+                    {
+                      "name": "last_treatment_type_description",
+                      "expression": "`last_treatment_type_description`"
+                    },
+                    {
+                      "name": "last_treatment_amount",
+                      "expression": "`last_treatment_amount`"
+                    },
+                    {
+                      "name": "payments_count_all_time",
+                      "expression": "`payments_count_all_time`"
+                    },
+                    {
+                      "name": "payments_sum_all_time",
+                      "expression": "`payments_sum_all_time`"
+                    },
+                    {
+                      "name": "avg_monthly_payment_12m",
+                      "expression": "`avg_monthly_payment_12m`"
+                    },
+                    {
+                      "name": "payments_count_12m",
+                      "expression": "`payments_count_12m`"
+                    },
+                    {
+                      "name": "last_payment_date",
+                      "expression": "`last_payment_date`"
+                    },
+                    {
+                      "name": "last_payment_type",
+                      "expression": "`last_payment_type`"
+                    },
+                    {
+                      "name": "last_payment_amount",
+                      "expression": "`last_payment_amount`"
+                    },
+                    {
+                      "name": "payment_types_last_12m",
+                      "expression": "`payment_types_last_12m`"
+                    },
+                    {
+                      "name": "last_12_mo_payments",
+                      "expression": "`last_12_mo_payments`"
+                    },
+                    {
+                      "name": "payment_ledger_last_12m",
+                      "expression": "`payment_ledger_last_12m`"
+                    },
+                    {
+                      "name": "current_mrc_sum",
+                      "expression": "`current_mrc_sum`"
+                    },
+                    {
+                      "name": "current_services",
+                      "expression": "`current_services`"
+                    },
+                    {
+                      "name": "current_month_mrc_sum",
+                      "expression": "`current_month_mrc_sum`"
+                    },
+                    {
+                      "name": "current_month_itemized_services",
+                      "expression": "`current_month_itemized_services`"
+                    },
+                    {
+                      "name": "adjustments_count_all_time",
+                      "expression": "`adjustments_count_all_time`"
+                    },
+                    {
+                      "name": "adjustments_sum_all_time",
+                      "expression": "`adjustments_sum_all_time`"
+                    },
+                    {
+                      "name": "adjustments_last_12m",
+                      "expression": "`adjustments_last_12m`"
+                    },
+                    {
+                      "name": "adjustments_current_month_sum",
+                      "expression": "`adjustments_current_month_sum`"
+                    },
+                    {
+                      "name": "adjustments_current_month_items",
+                      "expression": "`adjustments_current_month_items`"
+                    },
+                    {
+                      "name": "lobtype_last_seen",
+                      "expression": "`lobtype_last_seen`"
+                    },
+                    {
+                      "name": "lobtype_mode_12m",
+                      "expression": "`lobtype_mode_12m`"
+                    },
+                    {
+                      "name": "other_btns_same_name_addr",
+                      "expression": "`other_btns_same_name_addr`"
+                    },
+                    {
+                      "name": "treatment_events_last_12m",
+                      "expression": "`treatment_events_last_12m`"
+                    },
+                    {
+                      "name": "treatment_event_cnt_12m",
+                      "expression": "`treatment_event_cnt_12m`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "btn",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "btn",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "dpi_environment",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "dpi_environment",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "customer_name",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "customer_name",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "service_address",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "service_address",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "connect_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "connect_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "disconnect_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100005,
+                    "title": "disconnect_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "days_in_service",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100006,
+                    "title": "days_in_service",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "suspend_open_flag",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100007,
+                    "title": "suspend_open_flag",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "suspend_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100008,
+                    "title": "suspend_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "dpa_open_flag",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100009,
+                    "title": "dpa_open_flag",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "dpa_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100010,
+                    "title": "dpa_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "nsf_open_flag",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100011,
+                    "title": "nsf_open_flag",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "nsf_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100012,
+                    "title": "nsf_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "ovr_open_flag",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100013,
+                    "title": "ovr_open_flag",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "ovr_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100014,
+                    "title": "ovr_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_reminder_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100015,
+                    "title": "last_reminder_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_reminder_amount_due",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100016,
+                    "title": "last_reminder_amount_due",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_suspended_amount",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100017,
+                    "title": "last_suspended_amount",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "disqualified_upsell_sne_yn",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100018,
+                    "title": "disqualified_upsell_sne_yn",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "active_promos",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100019,
+                    "title": "active_promos",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "recent_promos_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100020,
+                    "title": "recent_promos_12m",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_treatment_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100021,
+                    "title": "last_treatment_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_treatment_type",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100022,
+                    "title": "last_treatment_type",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_treatment_type_description",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100023,
+                    "title": "last_treatment_type_description",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_treatment_amount",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100024,
+                    "title": "last_treatment_amount",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "payments_count_all_time",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100025,
+                    "title": "payments_count_all_time",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "payments_sum_all_time",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100026,
+                    "title": "payments_sum_all_time",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "avg_monthly_payment_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100027,
+                    "title": "avg_monthly_payment_12m",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "payments_count_12m",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100028,
+                    "title": "payments_count_12m",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_payment_date",
+                    "dateTimeFormat": "DD/MM/YYYY",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "date",
+                    "displayAs": "datetime",
+                    "visible": true,
+                    "order": 100029,
+                    "title": "last_payment_date",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_payment_type",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100030,
+                    "title": "last_payment_type",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_payment_amount",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100031,
+                    "title": "last_payment_amount",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "payment_types_last_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100032,
+                    "title": "payment_types_last_12m",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "last_12_mo_payments",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100033,
+                    "title": "last_12_mo_payments",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "payment_ledger_last_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100034,
+                    "title": "payment_ledger_last_12m",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "current_mrc_sum",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100035,
+                    "title": "current_mrc_sum",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "current_services",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100036,
+                    "title": "current_services",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "current_month_mrc_sum",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100037,
+                    "title": "current_month_mrc_sum",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "current_month_itemized_services",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100038,
+                    "title": "current_month_itemized_services",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "adjustments_count_all_time",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100039,
+                    "title": "adjustments_count_all_time",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "adjustments_sum_all_time",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100040,
+                    "title": "adjustments_sum_all_time",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "adjustments_last_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100041,
+                    "title": "adjustments_last_12m",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "adjustments_current_month_sum",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100042,
+                    "title": "adjustments_current_month_sum",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "adjustments_current_month_items",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100043,
+                    "title": "adjustments_current_month_items",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "lobtype_last_seen",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100044,
+                    "title": "lobtype_last_seen",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "lobtype_mode_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100045,
+                    "title": "lobtype_mode_12m",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "other_btns_same_name_addr",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100046,
+                    "title": "other_btns_same_name_addr",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "treatment_events_last_12m",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "complex",
+                    "displayAs": "json",
+                    "visible": true,
+                    "order": 100047,
+                    "title": "treatment_events_last_12m",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "treatment_event_cnt_12m",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100048,
+                    "title": "treatment_event_cnt_12m",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 50,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": true,
+              "frame": {
+                "showTitle": true,
+                "title": "Raw Account Data",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 44,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "84d0cd90",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 22,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "9f3bca44",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 2,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "7a65f59a",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0d525c15",
+                  "fields": [
+                    {
+                      "name": "current_mrc_sum",
+                      "expression": "`current_mrc_sum`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "current_mrc_sum",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "MRC without Taxes",
+                "headerAlignment": "center"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 26,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e98db7eb",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 24,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "3519f552",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ee3e8673",
+                  "fields": [
+                    {
+                      "name": "other_btns_same_name_addr",
+                      "expression": "`other_btns_same_name_addr`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "other_btns_same_name_addr",
+                  "style": {
+                    "color": {
+                      "themeColorType": "visualizationColors",
+                      "position": 4
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Associated Contacts"
+              }
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 8,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "2bd9fca9",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 5,
+            "y": 10,
+            "width": 1,
+            "height": 1
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "04514d1e",
+      "displayName": "Sales Performance",
+      "layout": [
+        {
+          "widget": {
+            "name": "99135c41",
+            "multilineTextboxSpec": {
+              "lines": [
+                ""
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "sales-channel-performance",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b0ce6ba0",
+                  "fields": [
+                    {
+                      "name": "channel_level_1",
+                      "expression": "`channel_level_1`"
+                    },
+                    {
+                      "name": "total_revenue",
+                      "expression": "`total_revenue`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "histogram",
+              "encodings": {
+                "x": {
+                  "fieldName": "channel_level_1",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "total_revenue",
+                  "format": {
+                    "type": "number-currency",
+                    "currencyCode": "USD",
+                    "abbreviation": "compact",
+                    "decimalPlaces": {
+                      "type": "max",
+                      "places": 2
+                    }
+                  },
+                  "scale": {
+                    "type": "quantitative",
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Sales Channel Performance"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "order-volume",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b0ce6ba0",
+                  "fields": [
+                    {
+                      "name": "channel_level_1",
+                      "expression": "`channel_level_1`"
+                    },
+                    {
+                      "name": "total_orders",
+                      "expression": "`total_orders`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "channel_level_1",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "total_orders",
+                  "scale": {
+                    "type": "quantitative",
+                    "fn": {
+                      "type": "symlog"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Order Volume"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 8,
+            "width": 2,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "98272080",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b0ce6ba0",
+                  "fields": [
+                    {
+                      "name": "total_orders",
+                      "expression": "`total_orders`"
+                    },
+                    {
+                      "name": "channel_level_1",
+                      "expression": "`channel_level_1`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "total_orders",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "channel_level_1",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "4c785e32",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "b0ce6ba0",
+                  "fields": [
+                    {
+                      "name": "channel_level_1",
+                      "expression": "`channel_level_1`"
+                    },
+                    {
+                      "name": "channel_level_2",
+                      "expression": "`channel_level_2`"
+                    },
+                    {
+                      "name": "total_orders",
+                      "expression": "`total_orders`"
+                    },
+                    {
+                      "name": "total_revenue",
+                      "expression": "`total_revenue`"
+                    },
+                    {
+                      "name": "avg_data_quality",
+                      "expression": "`avg_data_quality`"
+                    },
+                    {
+                      "name": "migrations",
+                      "expression": "`migrations`"
+                    },
+                    {
+                      "name": "fiber_orders",
+                      "expression": "`fiber_orders`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "channel_level_1",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "channel_level_1",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "channel_level_2",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "channel_level_2",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "total_orders",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "total_orders",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "total_revenue",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "decimal",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "total_revenue",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "avg_data_quality",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "avg_data_quality",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "migrations",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100005,
+                    "title": "migrations",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  },
+                  {
+                    "fieldName": "fiber_orders",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100006,
+                    "title": "fiber_orders",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": true
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 6,
+            "height": 9
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "genieSpace": {
+      "isEnabled": true,
+      "enablementMode": "ENABLED"
+    },
+    "applyModeEnabled": false
+  }
+}
